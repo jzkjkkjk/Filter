@@ -17,9 +17,7 @@ public class MainActivity extends AppCompatActivity {
         mFilterLayout = (FilterLayout) findViewById(R.id.filter);
         mFilterLayout.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-
-            }
+            public void onClick(View v) {}
         });
     }
 }
