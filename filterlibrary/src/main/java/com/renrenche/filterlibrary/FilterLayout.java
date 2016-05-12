@@ -19,24 +19,16 @@ import android.widget.TextView;
 /**
  * Created by jiazhenkai on 16/4/20.
  */
-public class FilterLayout extends LinearLayout {
+public class FilterLayout extends LinearLayout implements View.OnClickListener {
 
     private float mDensity;
     private boolean mHasContentOpen;
     private boolean mIsAnimating;
-    private Animation mAnimationIn;
-    private Animation mAnimationOut;
+    private Animation mAnimationOpen;
+    private Animation mAnimationClose;
     private View mContentView;
     private View mMaskView;
     private View mIndicator;
-    private OnClickListener mCloseListener = new OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (!mIsAnimating && mHasContentOpen) {
-                close();
-            }
-        }
-    };
 
     public FilterLayout(Context context) {
         this(context, null, 0);
@@ -62,7 +54,7 @@ public class FilterLayout extends LinearLayout {
         mDensity = getResources().getDisplayMetrics().density;
         addView(createHeader(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         addView(createContainer(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        setOnClickListener(mCloseListener);
+        setOnClickListener(this);
         initAnim();
         mContentView = findViewById(R.id.filter_content);
         mContentView.setOnClickListener(new OnClickListener() {
@@ -130,8 +122,8 @@ public class FilterLayout extends LinearLayout {
     }
 
     private void initAnim() {
-        mAnimationIn = AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_from_top);
-        mAnimationIn.setAnimationListener(new AnimationAdapter() {
+        mAnimationOpen = AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_from_top);
+        mAnimationOpen.setAnimationListener(new AnimationAdapter() {
             @Override
             public void onAnimationStart(Animation animation) {
                 mContentView.setVisibility(VISIBLE);
@@ -144,8 +136,8 @@ public class FilterLayout extends LinearLayout {
                 mIsAnimating = false;
             }
         });
-        mAnimationOut = AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_to_top);
-        mAnimationOut.setAnimationListener(new AnimationAdapter() {
+        mAnimationClose = AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_to_top);
+        mAnimationClose.setAnimationListener(new AnimationAdapter() {
             @Override
             public void onAnimationStart(Animation animation) {
                 mIsAnimating = true;
@@ -160,20 +152,40 @@ public class FilterLayout extends LinearLayout {
         });
     }
 
-    private void close() {
-        mContentView.startAnimation(mAnimationOut);
+    public void close() {
+        mContentView.startAnimation(mAnimationClose);
         mMaskView.animate().alpha(0).setDuration(300).start();
         mIndicator.animate().rotation(0).setDuration(300).start();
     }
 
     private void open() {
-        mContentView.startAnimation(mAnimationIn);
+        mContentView.startAnimation(mAnimationOpen);
         mMaskView.animate().alpha(0.5f).setDuration(300).start();
         mIndicator.animate().rotation(180).setDuration(300).start();
     }
 
+    public boolean isOpened() {
+        return mHasContentOpen;
+    }
+
     private int dp2Pixel(float dp) {
         return (int) (dp * mDensity + 0.5f);
+    }
+
+    @Override
+    public void setOnClickListener(OnClickListener l) {
+        if (l == this) {
+            super.setOnClickListener(l);
+        } else {
+            throw new IllegalArgumentException("The listener can only be itself!");
+        }
+    }
+
+    @Override
+    public final void onClick(View v) {
+        if (!mIsAnimating && mHasContentOpen) {
+            close();
+        }
     }
 
     private static class AnimationAdapter implements Animation.AnimationListener {

@@ -14,6 +14,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mFilterLayout = (FilterLayout) findViewById(R.id.filter);
-        mFilterLayout.setOnClickListener(null);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mFilterLayout.isOpened()) {
+            mFilterLayout.close();
+        } else {
+            super.onBackPressed();
+        }
     }
 }
