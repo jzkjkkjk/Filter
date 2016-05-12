@@ -1,5 +1,7 @@
 package com.renrenche.filterlibrary;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Color;
@@ -8,8 +10,7 @@ import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,11 +22,10 @@ import android.widget.TextView;
  */
 public class FilterLayout extends LinearLayout implements View.OnClickListener {
 
+    private static final int ANIM_DURATION = 2000;
     private float mDensity;
-    private boolean mHasContentOpen;
+    private boolean mIsOpened;
     private boolean mIsAnimating;
-    private Animation mAnimationOpen;
-    private Animation mAnimationClose;
     private View mContentView;
     private View mMaskView;
     private View mIndicator;
@@ -55,14 +55,6 @@ public class FilterLayout extends LinearLayout implements View.OnClickListener {
         addView(createHeader(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         addView(createContainer(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         setOnClickListener(this);
-        initAnim();
-        mContentView = findViewById(R.id.filter_content);
-        mContentView.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
         if (isHardwareAccelerated()) {
             mContentView.setLayerType(LAYER_TYPE_HARDWARE, null);
             mMaskView.setLayerType(LAYER_TYPE_HARDWARE, null);
@@ -79,10 +71,10 @@ public class FilterLayout extends LinearLayout implements View.OnClickListener {
                 if (mIsAnimating) {
                     return;
                 }
-                if (!mHasContentOpen) {
-                    open();
-                } else {
+                if (mIsOpened) {
                     close();
+                } else {
+                    open();
                 }
             }
         });
@@ -113,63 +105,71 @@ public class FilterLayout extends LinearLayout implements View.OnClickListener {
         contentContainer.setBackgroundColor(Color.BLACK);
         ViewCompat.setAlpha(contentContainer, 0);
         FrameLayout content = new FrameLayout(context);//TODO content
-        content.setId(R.id.filter_content);
+        mContentView = content;
         content.setBackgroundColor(Color.WHITE);
         contentContainer.addView(content);
-        content.setVisibility(INVISIBLE);
         content.getLayoutParams().height = dp2Pixel(200);
         return contentContainer;
     }
 
-    private void initAnim() {
-        mAnimationOpen = AnimationUtils.loadAnimation(getContext(), R.anim.slide_in_from_top);
-        mAnimationOpen.setAnimationListener(new AnimationAdapter() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-                mContentView.setVisibility(VISIBLE);
-                mIsAnimating = true;
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                mHasContentOpen = true;
-                mIsAnimating = false;
-            }
-        });
-        mAnimationClose = AnimationUtils.loadAnimation(getContext(), R.anim.slide_out_to_top);
-        mAnimationClose.setAnimationListener(new AnimationAdapter() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-                mIsAnimating = true;
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                mContentView.setVisibility(GONE);
-                mHasContentOpen = false;
-                mIsAnimating = false;
-            }
-        });
-    }
-
     public void close() {
-        mContentView.startAnimation(mAnimationClose);
-        mMaskView.animate().alpha(0).setDuration(300).start();
-        mIndicator.animate().rotation(0).setDuration(300).start();
+        mContentView.animate().translationY(-mContentView.getHeight()).setDuration(ANIM_DURATION).start();
+        mMaskView.animate().alpha(0).setDuration(ANIM_DURATION).start();
+        mIndicator.animate().rotation(0).setDuration(ANIM_DURATION).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mIsAnimating = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mIsOpened = false;
+                mIsAnimating = false;
+            }
+        }).start();
     }
 
     private void open() {
-        mContentView.startAnimation(mAnimationOpen);
-        mMaskView.animate().alpha(0.5f).setDuration(300).start();
-        mIndicator.animate().rotation(180).setDuration(300).start();
+        mContentView.animate().translationY(0).setDuration(ANIM_DURATION).start();
+        mMaskView.animate().alpha(0.5f).setDuration(ANIM_DURATION).start();
+        mIndicator.animate().rotation(180).setDuration(ANIM_DURATION).setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                mIsAnimating = true;
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                mIsOpened = true;
+                mIsAnimating = false;
+            }
+        }).start();
+    }
+
+    public boolean isAnimating() {
+        return mIsAnimating;
     }
 
     public boolean isOpened() {
-        return mHasContentOpen;
+        return !mIsAnimating && mIsOpened;
     }
 
     private int dp2Pixel(float dp) {
         return (int) (dp * mDensity + 0.5f);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        final ViewTreeObserver viewTreeObserver = mContentView.getViewTreeObserver();
+        viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                viewTreeObserver.removeOnPreDrawListener(this);
+                mContentView.animate().translationY(-mContentView.getHeight()).setDuration(ANIM_DURATION).start();
+                return true;
+            }
+        });
     }
 
     @Override
@@ -183,41 +183,11 @@ public class FilterLayout extends LinearLayout implements View.OnClickListener {
 
     @Override
     public final void onClick(View v) {
-        if (!mIsAnimating && mHasContentOpen) {
+        if (mIsAnimating) {
+            return;
+        }
+        if (mIsOpened) {
             close();
-        }
-    }
-
-    private static class AnimationAdapter implements Animation.AnimationListener {
-
-        @Override
-        public void onAnimationStart(Animation animation) {
-
-        }
-
-        @Override
-        public void onAnimationEnd(Animation animation) {
-
-        }
-
-        @Override
-        public void onAnimationRepeat(Animation animation) {
-
-        }
-    }
-
-    public static class Adapter<T> {
-
-        public T getItem() {
-            return null;
-        }
-
-        public int getCount() {
-            return 0;
-        }
-
-        public View getView(int position) {
-            return null;
         }
     }
 }

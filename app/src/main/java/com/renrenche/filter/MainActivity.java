@@ -18,10 +18,12 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (mFilterLayout.isOpened()) {
-            mFilterLayout.close();
-        } else {
-            super.onBackPressed();
+        if (!mFilterLayout.isAnimating()) {
+            if (mFilterLayout.isOpened()) {
+                mFilterLayout.close();
+            } else {
+                super.onBackPressed();
+            }
         }
     }
 }
