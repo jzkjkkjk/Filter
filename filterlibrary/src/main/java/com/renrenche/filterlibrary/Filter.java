@@ -2,64 +2,89 @@ package com.renrenche.filterlibrary;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.IntEvaluator;
+import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
-import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 /**
  * Created by jiazhenkai on 16/4/20.
  */
-public class FilterLayout extends LinearLayout implements View.OnClickListener {
+public class Filter extends FrameLayout implements View.OnClickListener {
 
     private static final int ANIM_DURATION = 2000;
+    private static final int HEADER_HEIGHT = 60;
     private float mDensity;
     private boolean mIsOpened;
     private boolean mIsAnimating;
     private View mContentView;
-    private View mMaskView;
     private View mIndicator;
+    private ValueAnimator mBgAlphaOpenVam;
+    private ValueAnimator mBgAlphaCloseVam;
 
-    public FilterLayout(Context context) {
+    public Filter(Context context) {
         this(context, null, 0);
     }
 
-    public FilterLayout(Context context, AttributeSet attrs) {
+    public Filter(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public FilterLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public Filter(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init(context, attrs);
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public FilterLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public Filter(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context, attrs);
     }
 
     private void init(Context context, AttributeSet attrs) {
-        setOrientation(VERTICAL);
+        setBackgroundColor(Color.BLACK);
+        getBackground().setAlpha(0);
         mDensity = getResources().getDisplayMetrics().density;
-        addView(createHeader(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        addView(createContainer(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        addView(createContent(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        addView(createHeader(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp2Pixel(HEADER_HEIGHT)));
+        mContentView.getLayoutParams().height = dp2Pixel(200);
+        FrameLayout.LayoutParams fl = (LayoutParams) mContentView.getLayoutParams();
+        fl.topMargin = dp2Pixel(HEADER_HEIGHT);
         setOnClickListener(this);
         if (isHardwareAccelerated()) {
             mContentView.setLayerType(LAYER_TYPE_HARDWARE, null);
-            mMaskView.setLayerType(LAYER_TYPE_HARDWARE, null);
             mIndicator.setLayerType(LAYER_TYPE_HARDWARE, null);
         }
+
+        mBgAlphaOpenVam = ValueAnimator.ofInt(0, 128);
+        mBgAlphaOpenVam.setEvaluator(new IntEvaluator());
+        mBgAlphaOpenVam.setDuration(ANIM_DURATION);
+        mBgAlphaOpenVam.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                getBackground().setAlpha((int) animation.getAnimatedValue());
+            }
+        });
+
+        mBgAlphaCloseVam = ValueAnimator.ofInt(128, 0);
+        mBgAlphaCloseVam.setEvaluator(new IntEvaluator());
+        mBgAlphaCloseVam.setDuration(ANIM_DURATION);
+        mBgAlphaCloseVam.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                getBackground().setAlpha((int) animation.getAnimatedValue());
+            }
+        });
     }
 
     private View createHeader(Context context) {
@@ -99,22 +124,16 @@ public class FilterLayout extends LinearLayout implements View.OnClickListener {
         return headerLayout;
     }
 
-    private View createContainer(Context context) {
-        FrameLayout contentContainer = new FrameLayout(context);
-        mMaskView = contentContainer;
-        contentContainer.setBackgroundColor(Color.BLACK);
-        ViewCompat.setAlpha(contentContainer, 0);
+    private View createContent(Context context) {
         FrameLayout content = new FrameLayout(context);//TODO content
         mContentView = content;
         content.setBackgroundColor(Color.WHITE);
-        contentContainer.addView(content);
-        content.getLayoutParams().height = dp2Pixel(200);
-        return contentContainer;
+        return content;
     }
 
     public void close() {
-        mContentView.animate().translationY(-mContentView.getHeight()).setDuration(ANIM_DURATION).start();
-        mMaskView.animate().alpha(0).setDuration(ANIM_DURATION).start();
+        mContentView.animate().translationY(- mContentView.getHeight()).setDuration(ANIM_DURATION).start();
+        mBgAlphaCloseVam.start();
         mIndicator.animate().rotation(0).setDuration(ANIM_DURATION).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -131,7 +150,7 @@ public class FilterLayout extends LinearLayout implements View.OnClickListener {
 
     private void open() {
         mContentView.animate().translationY(0).setDuration(ANIM_DURATION).start();
-        mMaskView.animate().alpha(0.5f).setDuration(ANIM_DURATION).start();
+        mBgAlphaOpenVam.start();
         mIndicator.animate().rotation(180).setDuration(ANIM_DURATION).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
@@ -166,7 +185,7 @@ public class FilterLayout extends LinearLayout implements View.OnClickListener {
             @Override
             public boolean onPreDraw() {
                 viewTreeObserver.removeOnPreDrawListener(this);
-                mContentView.animate().translationY(-mContentView.getHeight()).setDuration(ANIM_DURATION).start();
+                mContentView.animate().translationY(- mContentView.getHeight()).setDuration(0).start();
                 return true;
             }
         });
