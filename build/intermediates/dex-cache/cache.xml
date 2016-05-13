@@ -1,2 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<items version="2" />
+<items version="2" >
+
+    <item
+        jar="F:\Filter\app\build\intermediates\exploded-aar\Filter\filterlibrary\unspecified\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.2"
+        sha1="ceb5dcbee691b2d935d53a53404e2c65c905ac23">
+        <dex dex="F:\Filter\app\build\intermediates\pre-dexed\debug\Filter-filterlibrary-unspecified_c624251ad13fbeb1eb03592ceb82f7eb90aaeab7.jar" />
+    </item>
+
+</items>

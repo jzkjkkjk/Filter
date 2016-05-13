@@ -12,8 +12,10 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -22,15 +24,22 @@ import android.widget.TextView;
  */
 public class Filter extends FrameLayout implements View.OnClickListener {
 
-    private static final int ANIM_DURATION = 2000;
-    private static final int HEADER_HEIGHT = 60;
+    static final int HEADER_HEIGHT = 60;
+    private static final int ANIM_DURATION = 300;
+    private static final int ALPHA_THRESHOLD = 64;
     private float mDensity;
     private boolean mIsOpened;
     private boolean mIsAnimating;
-    private View mContentView;
+    private ListView mContentView;
+    private TextView mTitleView;
     private View mIndicator;
+    private View mMask;
     private ValueAnimator mBgAlphaOpenVam;
     private ValueAnimator mBgAlphaCloseVam;
+    private FilterAdapter mAdapter;
+    private OnFilterItemClickListener mOnFilterItemClickListener;
+    private OnFilterStatusChangedListener mOnFilterStatusChangedListener;
+    private Lock mLock;
 
     public Filter(Context context) {
         this(context, null, 0);
@@ -55,45 +64,46 @@ public class Filter extends FrameLayout implements View.OnClickListener {
         setBackgroundColor(Color.BLACK);
         getBackground().setAlpha(0);
         mDensity = getResources().getDisplayMetrics().density;
-        addView(createContent(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        addView(createHeader(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp2Pixel(HEADER_HEIGHT)));
-        mContentView.getLayoutParams().height = dp2Pixel(200);
+
+        addView(createContent(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        addView(createTitle(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp2Pixel(HEADER_HEIGHT)));
         FrameLayout.LayoutParams fl = (LayoutParams) mContentView.getLayoutParams();
         fl.topMargin = dp2Pixel(HEADER_HEIGHT);
-        setOnClickListener(this);
         if (isHardwareAccelerated()) {
             mContentView.setLayerType(LAYER_TYPE_HARDWARE, null);
             mIndicator.setLayerType(LAYER_TYPE_HARDWARE, null);
         }
 
-        mBgAlphaOpenVam = ValueAnimator.ofInt(0, 128);
+        mMask = this;
+        mMask.setOnClickListener(this);
+        mBgAlphaOpenVam = ValueAnimator.ofInt(0, ALPHA_THRESHOLD);
         mBgAlphaOpenVam.setEvaluator(new IntEvaluator());
         mBgAlphaOpenVam.setDuration(ANIM_DURATION);
         mBgAlphaOpenVam.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                getBackground().setAlpha((int) animation.getAnimatedValue());
+                mMask.getBackground().setAlpha((int) animation.getAnimatedValue());
             }
         });
 
-        mBgAlphaCloseVam = ValueAnimator.ofInt(128, 0);
+        mBgAlphaCloseVam = ValueAnimator.ofInt(ALPHA_THRESHOLD, 0);
         mBgAlphaCloseVam.setEvaluator(new IntEvaluator());
         mBgAlphaCloseVam.setDuration(ANIM_DURATION);
         mBgAlphaCloseVam.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                getBackground().setAlpha((int) animation.getAnimatedValue());
+                mMask.getBackground().setAlpha((int) animation.getAnimatedValue());
             }
         });
     }
 
-    private View createHeader(Context context) {
-        RelativeLayout headerLayout = new RelativeLayout(context);
-        headerLayout.setBackgroundColor(Color.RED);//TODO title bg color
-        headerLayout.setOnClickListener(new OnClickListener() {
+    private View createTitle(Context context) {
+        RelativeLayout titleLayout = new RelativeLayout(context);
+        titleLayout.setBackgroundColor(Color.RED);//TODO title bg color
+        titleLayout.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mIsAnimating) {
+                if (mIsAnimating || (mLock != null && mLock.shouldLock(Filter.this))) {
                     return;
                 }
                 if (mIsOpened) {
@@ -104,46 +114,62 @@ public class Filter extends FrameLayout implements View.OnClickListener {
             }
         });
 
-        TextView headerTitle = new TextView(context);
-        headerTitle.setTextColor(Color.WHITE);//TODO title text color
-        headerTitle.setText("这是测试");//TODO title text
-        headerTitle.setTextSize(20);//TODO title text size
-        headerTitle.setPadding(0, dp2Pixel(15), 0, dp2Pixel(15));//TODO title text padding
-        headerLayout.addView(headerTitle);
-        RelativeLayout.LayoutParams titleRlp = (RelativeLayout.LayoutParams) headerTitle.getLayoutParams();
+        mTitleView = new TextView(context);
+        mTitleView.setTextColor(Color.WHITE);//TODO title text color
+        mTitleView.setText("这是测试");//TODO title text
+        mTitleView.setTextSize(20);//TODO title text size
+        mTitleView.setPadding(0, dp2Pixel(15), 0, dp2Pixel(15));//TODO title text padding
+        titleLayout.addView(mTitleView);
+        RelativeLayout.LayoutParams titleRlp = (RelativeLayout.LayoutParams) mTitleView.getLayoutParams();
         titleRlp.addRule(RelativeLayout.CENTER_IN_PARENT);
 
         ImageView headerIndicator = new ImageView(context);
         mIndicator = headerIndicator;
-        headerIndicator.setImageResource(R.mipmap.ic_launcher);//TODO indicator img
-        headerLayout.addView(headerIndicator);
+        headerIndicator.setImageResource(R.mipmap.ic_arrow_gray);//TODO indicator img
+        titleLayout.addView(headerIndicator);
         RelativeLayout.LayoutParams indicatorRlp = (RelativeLayout.LayoutParams) headerIndicator.getLayoutParams();
         indicatorRlp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
         indicatorRlp.addRule(RelativeLayout.CENTER_VERTICAL);
-        indicatorRlp.leftMargin = dp2Pixel(10);//TODO indicator img margin right
-        return headerLayout;
+        indicatorRlp.rightMargin = dp2Pixel(15);//TODO indicator img margin right
+        return titleLayout;
     }
 
     private View createContent(Context context) {
-        FrameLayout content = new FrameLayout(context);//TODO content
-        mContentView = content;
-        content.setBackgroundColor(Color.WHITE);
-        return content;
+        mContentView = new ListView(context);
+        mContentView.setBackgroundColor(Color.WHITE);
+        mContentView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mOnFilterItemClickListener != null) {
+                    close();
+                    FilterItemModel item = mAdapter.getItem(position);
+                    mOnFilterItemClickListener.onFilterItemClick(item.mTitle, item.mValue);
+                }
+            }
+        });
+        return mContentView;
     }
 
     public void close() {
-        mContentView.animate().translationY(- mContentView.getHeight()).setDuration(ANIM_DURATION).start();
+        mContentView.animate().translationY(-mContentView.getHeight()).setDuration(ANIM_DURATION).start();
         mBgAlphaCloseVam.start();
         mIndicator.animate().rotation(0).setDuration(ANIM_DURATION).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
                 mIsAnimating = true;
+                if (mOnFilterStatusChangedListener != null) {
+                    mOnFilterStatusChangedListener.onFilterAnimating(Filter.this);
+                }
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 mIsOpened = false;
                 mIsAnimating = false;
+                if (mOnFilterStatusChangedListener != null) {
+                    mOnFilterStatusChangedListener.onFilterClosed(Filter.this);
+                    mOnFilterStatusChangedListener.onFilterAnimating(null);
+                }
             }
         }).start();
     }
@@ -155,12 +181,19 @@ public class Filter extends FrameLayout implements View.OnClickListener {
             @Override
             public void onAnimationStart(Animator animation) {
                 mIsAnimating = true;
+                if (mOnFilterStatusChangedListener != null) {
+                    mOnFilterStatusChangedListener.onFilterAnimating(Filter.this);
+                }
             }
 
             @Override
             public void onAnimationEnd(Animator animation) {
                 mIsOpened = true;
                 mIsAnimating = false;
+                if (mOnFilterStatusChangedListener != null) {
+                    mOnFilterStatusChangedListener.onFilterOpened(Filter.this);
+                    mOnFilterStatusChangedListener.onFilterAnimating(null);
+                }
             }
         }).start();
     }
@@ -180,12 +213,13 @@ public class Filter extends FrameLayout implements View.OnClickListener {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
+        //TODO 临时
         final ViewTreeObserver viewTreeObserver = mContentView.getViewTreeObserver();
         viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
             @Override
             public boolean onPreDraw() {
                 viewTreeObserver.removeOnPreDrawListener(this);
-                mContentView.animate().translationY(- mContentView.getHeight()).setDuration(0).start();
+                mContentView.animate().translationY(-mContentView.getHeight()).setDuration(0).start();
                 return true;
             }
         });
@@ -208,5 +242,43 @@ public class Filter extends FrameLayout implements View.OnClickListener {
         if (mIsOpened) {
             close();
         }
+    }
+
+    public void setAdapter(FilterAdapter adapter) {
+        mAdapter = adapter;
+        mContentView.setAdapter(adapter);
+    }
+
+    public void setTitle(CharSequence title) {
+        mTitleView.setText(title);
+    }
+
+    public void setOnFilterItemClickListener(OnFilterItemClickListener listener) {
+        mOnFilterItemClickListener = listener;
+    }
+
+    public void setOnFilterStatusChangedListener(OnFilterStatusChangedListener listener) {
+        mOnFilterStatusChangedListener = listener;
+    }
+
+    public void setMask(View mask) {
+        mMask = mask;
+        setClickable(false);
+    }
+
+    void registerLock(Lock lock) {
+        mLock = lock;
+    }
+
+    public interface OnFilterStatusChangedListener {
+        void onFilterOpened(Filter filter);
+
+        void onFilterAnimating(Filter filter);
+
+        void onFilterClosed(Filter filter);
+    }
+
+    interface Lock {
+        boolean shouldLock(Filter filter);
     }
 }

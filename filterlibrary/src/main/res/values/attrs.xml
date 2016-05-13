@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="Filter">
+        <attr name="dimen_model" format="enum">
+            <enum name="average" value="1" />
+            <enum name="adaptation" value="2" />
+            <enum name="specify" value="4" />
+        </attr>
+    </declare-styleable>
+</resources>
