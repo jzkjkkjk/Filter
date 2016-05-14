@@ -10,9 +10,9 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -25,7 +25,6 @@ import android.widget.TextView;
  */
 public class Filter extends FrameLayout implements View.OnClickListener {
 
-    static final int HEADER_HEIGHT = 60;
     private static final int ANIM_DURATION = 300;
     private static final int ALPHA_THRESHOLD = 64;
     private float mDensity;
@@ -43,6 +42,7 @@ public class Filter extends FrameLayout implements View.OnClickListener {
     private OnFilterStatusChangedListener mOnFilterStatusChangedListener;
     private Lock mLock;
 
+    private int mHeaderHeight;
     private int mHeaderSelector;
     private int mHeaderTextColor;
     private float mHeaderTextSize;
@@ -72,6 +72,7 @@ public class Filter extends FrameLayout implements View.OnClickListener {
         mDensity = getResources().getDisplayMetrics().density;
 
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.Filter);
+        mHeaderHeight = typedArray.getDimensionPixelSize(R.styleable.Filter_header_height, getResources().getDimensionPixelSize(R.dimen.default_header_height));
         mHeaderSelector = typedArray.getResourceId(R.styleable.Filter_header_selector, -1);
         mHeaderTextColor = typedArray.getColor(R.styleable.Filter_header_text_color, Color.DKGRAY);
         mHeaderTextSize = typedArray.getDimension(R.styleable.Filter_header_text_size, 18);
@@ -80,10 +81,10 @@ public class Filter extends FrameLayout implements View.OnClickListener {
         //init content
         addView(createContent(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
         FrameLayout.LayoutParams fl = (LayoutParams) mContentView.getLayoutParams();
-        fl.topMargin = dp2Pixel(HEADER_HEIGHT) + 1;
+        fl.topMargin = mHeaderHeight + 1;
 
         //init header
-        addView(createTitle(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp2Pixel(HEADER_HEIGHT)));
+        addView(createHeader(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mHeaderHeight));
         mTitleView.setTextSize(mHeaderTextSize);
         mTitleView.setTextColor(mHeaderTextColor);
 
@@ -115,7 +116,7 @@ public class Filter extends FrameLayout implements View.OnClickListener {
         });
     }
 
-    private View createTitle(Context context) {
+    private View createHeader(Context context) {
         mHeaderView = new RelativeLayout(context);
         mHeaderView.setOnClickListener(new OnClickListener() {
             @Override
@@ -152,12 +153,14 @@ public class Filter extends FrameLayout implements View.OnClickListener {
 
     private View createContent(Context context) {
         mContentView = new ListView(context);
+        mContentView.setDividerHeight(1);
         mContentView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 if (mOnFilterItemClickListener != null) {
                     close();
                     FilterItemModel item = mAdapter.getItem(position);
+                    mTitleView.setText(item.mValue);
                     mOnFilterItemClickListener.onFilterItemClick(item.mTitle, item.mValue);
                 }
             }
@@ -228,16 +231,10 @@ public class Filter extends FrameLayout implements View.OnClickListener {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        //TODO 临时
-        final ViewTreeObserver viewTreeObserver = mContentView.getViewTreeObserver();
-        viewTreeObserver.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                viewTreeObserver.removeOnPreDrawListener(this);
-                mContentView.animate().translationY(-mContentView.getHeight()).setDuration(0).start();
-                return true;
-            }
-        });
+        if (!isOpened() && mHeaderHeight > 0 && mContentView.getTop() >= mHeaderHeight) {
+            Log.e("test", "onLayout");
+            mContentView.animate().translationY(-mContentView.getHeight()).setDuration(0).start();
+        }
     }
 
     @Override
@@ -264,8 +261,14 @@ public class Filter extends FrameLayout implements View.OnClickListener {
             return;
         }
         mAdapter = adapter;
-        mAdapter.setContext(getContext());
         mContentView.setAdapter(adapter);
+    }
+
+    public void setHeaderHeight(int height) {
+        LayoutParams layoutParams = (LayoutParams) mHeaderView.getLayoutParams();
+        layoutParams.height = height;
+        LayoutParams fl = (LayoutParams) mContentView.getLayoutParams();
+        fl.topMargin = height + 1;
     }
 
     public void setHeaderSelector(int headerSelector) {

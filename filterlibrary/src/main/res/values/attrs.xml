@@ -6,6 +6,7 @@
             <enum name="adaptation" value="2" />
             <enum name="specify" value="4" />
         </attr>
+        <attr name="header_height" format="dimension|reference" />
         <attr name="header_selector" format="reference" />
         <attr name="header_text_color" format="color|reference" />
         <attr name="header_text_size" format="dimension|reference" />

@@ -32,6 +32,7 @@ public class MultipleFilter extends FrameLayout {
     private Filter mCurAnimatingFilter;
     private int mDimenModel;
     private Paint mPaint;
+    private int mHeaderHeight;
     private int mHeaderSelector;
     private int mItemLayoutId;
     private int mHeaderTextColor;
@@ -59,12 +60,13 @@ public class MultipleFilter extends FrameLayout {
     private void init(Context context, AttributeSet attrs) {
         mDensity = getResources().getDisplayMetrics().density;
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.Filter);
-        mDimenModel = typedArray.getInt(R.styleable.Filter_dimen_model, DIMEN_MODEL_AVERAGE);
-        mHeaderSelector = typedArray.getResourceId(R.styleable.Filter_header_selector, -1);
         mItemLayoutId = typedArray.getResourceId(R.styleable.Filter_item_layout, -1);
         if (mItemLayoutId < 0) {
             throw new IllegalArgumentException("Item layout must be specify!");
         }
+        mHeaderHeight = typedArray.getDimensionPixelSize(R.styleable.Filter_header_height, getResources().getDimensionPixelSize(R.dimen.default_header_height));
+        mDimenModel = typedArray.getInt(R.styleable.Filter_dimen_model, DIMEN_MODEL_AVERAGE);
+        mHeaderSelector = typedArray.getResourceId(R.styleable.Filter_header_selector, -1);
         mHeaderTextColor = typedArray.getColor(R.styleable.Filter_header_text_color, Color.DKGRAY);
         mHeaderTextSize = typedArray.getDimension(R.styleable.Filter_header_text_size, 18);
         typedArray.recycle();
@@ -80,7 +82,7 @@ public class MultipleFilter extends FrameLayout {
         for (int i = 0; i < count; i++) {
             View child = getChildAt(i);
             LayoutParams cLp = (LayoutParams) child.getLayoutParams();
-            cLp.topMargin = cLp.topMargin + dp2Pixel(Filter.HEADER_HEIGHT);
+            cLp.topMargin = cLp.topMargin + mHeaderHeight;
         }
 
         setMask(findViewById(R.id.filter_mask));
@@ -157,6 +159,7 @@ public class MultipleFilter extends FrameLayout {
         if (mMaskView != null) {
             item.setMask(mMaskView);
         }
+        item.setHeaderHeight(mHeaderHeight);
         item.setHeaderSelector(mHeaderSelector);
         item.setHeaderTextColor(mHeaderTextColor);
         item.setHeaderTextSize(mHeaderTextSize);

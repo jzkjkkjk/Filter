@@ -6,17 +6,20 @@
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="5dp"
         android:text="这是头"
-        android:textColor="#ff0000" />
+        android:textColor="@android:color/holo_blue_light"
+        android:textSize="18dp" />
 
     <TextView
         android:id="@+id/value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="5dp"
-        android:textColor="#ffffff" />
+        android:textColor="#ffffff"
+        android:textSize="18dp" />
 
 </com.renrenche.filter.FilterItemView>

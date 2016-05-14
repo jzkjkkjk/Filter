@@ -1,6 +1,6 @@
 package com.renrenche.filterlibrary;
 
-import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -10,7 +10,6 @@ import java.util.List;
 public final class FilterAdapter extends BaseAdapter {
 
     private List<FilterItemModel> mData;
-    private Context mContext;
     private int mItemLayoutId;
 
     public FilterAdapter(List<FilterItemModel> data, int itemLayoutId) {
@@ -31,10 +30,6 @@ public final class FilterAdapter extends BaseAdapter {
         return mData == null ? null : mData.get(position);
     }
 
-    void setContext(Context context) {
-        mContext = context;
-    }
-
     @Override
     public long getItemId(int position) {
         return position;
@@ -42,9 +37,10 @@ public final class FilterAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        Log.e("test", "getView");
         IFilterItemV item;
         if (convertView == null) {
-            item = (IFilterItemV) View.inflate(mContext, mItemLayoutId, null);
+            item = (IFilterItemV) View.inflate(parent.getContext(), mItemLayoutId, null);
         } else {
             item = (IFilterItemV) convertView;
         }
