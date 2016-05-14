@@ -3,6 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ListView
+        android:id="@+id/lv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="60dp" />
+
     <View
         android:id="@id/filter_mask"
         android:layout_width="match_parent"
@@ -21,7 +27,9 @@
         android:layout_width="600dp"
         android:layout_height="match_parent"
         android:layout_toRightOf="@id/right"
-        app:dimen_model="average" />
+        app:header_selector="@drawable/btn_dark_gray_selector"
+        app:header_text_color="#ffffff"
+        app:item_layout="@layout/item_filter" />
 
     <TextView
         android:layout_width="match_parent"

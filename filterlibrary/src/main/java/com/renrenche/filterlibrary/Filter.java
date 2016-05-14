@@ -6,6 +6,7 @@ import android.animation.IntEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -31,6 +32,7 @@ public class Filter extends FrameLayout implements View.OnClickListener {
     private boolean mIsOpened;
     private boolean mIsAnimating;
     private ListView mContentView;
+    private RelativeLayout mHeaderView;
     private TextView mTitleView;
     private View mIndicator;
     private View mMask;
@@ -40,6 +42,10 @@ public class Filter extends FrameLayout implements View.OnClickListener {
     private OnFilterItemClickListener mOnFilterItemClickListener;
     private OnFilterStatusChangedListener mOnFilterStatusChangedListener;
     private Lock mLock;
+
+    private int mHeaderSelector;
+    private int mHeaderTextColor;
+    private float mHeaderTextSize;
 
     public Filter(Context context) {
         this(context, null, 0);
@@ -65,17 +71,29 @@ public class Filter extends FrameLayout implements View.OnClickListener {
         getBackground().setAlpha(0);
         mDensity = getResources().getDisplayMetrics().density;
 
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.Filter);
+        mHeaderSelector = typedArray.getResourceId(R.styleable.Filter_header_selector, -1);
+        mHeaderTextColor = typedArray.getColor(R.styleable.Filter_header_text_color, Color.DKGRAY);
+        mHeaderTextSize = typedArray.getDimension(R.styleable.Filter_header_text_size, 18);
+        typedArray.recycle();
+
+        //init content
         addView(createContent(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-        addView(createTitle(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp2Pixel(HEADER_HEIGHT)));
         FrameLayout.LayoutParams fl = (LayoutParams) mContentView.getLayoutParams();
-        fl.topMargin = dp2Pixel(HEADER_HEIGHT);
+        fl.topMargin = dp2Pixel(HEADER_HEIGHT) + 1;
+
+        //init header
+        addView(createTitle(context), new LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dp2Pixel(HEADER_HEIGHT)));
+        mTitleView.setTextSize(mHeaderTextSize);
+        mTitleView.setTextColor(mHeaderTextColor);
+
         if (isHardwareAccelerated()) {
             mContentView.setLayerType(LAYER_TYPE_HARDWARE, null);
             mIndicator.setLayerType(LAYER_TYPE_HARDWARE, null);
         }
 
-        mMask = this;
-        mMask.setOnClickListener(this);
+        setMask(this);
+
         mBgAlphaOpenVam = ValueAnimator.ofInt(0, ALPHA_THRESHOLD);
         mBgAlphaOpenVam.setEvaluator(new IntEvaluator());
         mBgAlphaOpenVam.setDuration(ANIM_DURATION);
@@ -98,9 +116,8 @@ public class Filter extends FrameLayout implements View.OnClickListener {
     }
 
     private View createTitle(Context context) {
-        RelativeLayout titleLayout = new RelativeLayout(context);
-        titleLayout.setBackgroundColor(Color.RED);//TODO title bg color
-        titleLayout.setOnClickListener(new OnClickListener() {
+        mHeaderView = new RelativeLayout(context);
+        mHeaderView.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mIsAnimating || (mLock != null && mLock.shouldLock(Filter.this))) {
@@ -114,29 +131,27 @@ public class Filter extends FrameLayout implements View.OnClickListener {
             }
         });
 
-        mTitleView = new TextView(context);
-        mTitleView.setTextColor(Color.WHITE);//TODO title text color
-        mTitleView.setText("这是测试");//TODO title text
-        mTitleView.setTextSize(20);//TODO title text size
-        mTitleView.setPadding(0, dp2Pixel(15), 0, dp2Pixel(15));//TODO title text padding
-        titleLayout.addView(mTitleView);
-        RelativeLayout.LayoutParams titleRlp = (RelativeLayout.LayoutParams) mTitleView.getLayoutParams();
+        TextView titleView = new TextView(context);
+        mTitleView = titleView;
+        setSelector(titleView, mHeaderSelector);
+        titleView.setPadding(0, dp2Pixel(15), 0, dp2Pixel(15));//TODO title text padding
+        mHeaderView.addView(titleView);
+        RelativeLayout.LayoutParams titleRlp = (RelativeLayout.LayoutParams) titleView.getLayoutParams();
         titleRlp.addRule(RelativeLayout.CENTER_IN_PARENT);
 
         ImageView headerIndicator = new ImageView(context);
         mIndicator = headerIndicator;
         headerIndicator.setImageResource(R.mipmap.ic_arrow_gray);//TODO indicator img
-        titleLayout.addView(headerIndicator);
+        mHeaderView.addView(headerIndicator);
         RelativeLayout.LayoutParams indicatorRlp = (RelativeLayout.LayoutParams) headerIndicator.getLayoutParams();
         indicatorRlp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
         indicatorRlp.addRule(RelativeLayout.CENTER_VERTICAL);
         indicatorRlp.rightMargin = dp2Pixel(15);//TODO indicator img margin right
-        return titleLayout;
+        return mHeaderView;
     }
 
     private View createContent(Context context) {
         mContentView = new ListView(context);
-        mContentView.setBackgroundColor(Color.WHITE);
         mContentView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -245,8 +260,27 @@ public class Filter extends FrameLayout implements View.OnClickListener {
     }
 
     public void setAdapter(FilterAdapter adapter) {
+        if (adapter == null) {
+            return;
+        }
         mAdapter = adapter;
+        mAdapter.setContext(getContext());
         mContentView.setAdapter(adapter);
+    }
+
+    public void setHeaderSelector(int headerSelector) {
+        mHeaderSelector = headerSelector;
+        if (mHeaderSelector > 0) {
+            setSelector(mHeaderView, mHeaderSelector);
+        }
+    }
+
+    public void setHeaderTextColor(int color) {
+        mTitleView.setTextColor(color);
+    }
+
+    public void setHeaderTextSize(float size) {
+        mTitleView.setTextSize(size);
     }
 
     public void setTitle(CharSequence title) {
@@ -263,7 +297,18 @@ public class Filter extends FrameLayout implements View.OnClickListener {
 
     public void setMask(View mask) {
         mMask = mask;
-        setClickable(false);
+        if (mMask == this) {
+            setClickable(true);
+            setOnClickListener(this);
+        } else {
+            setClickable(false);
+        }
+    }
+
+    private void setSelector(View target, int selector) {
+        if (selector > 0) {
+            target.setBackgroundResource(selector);
+        }
     }
 
     void registerLock(Lock lock) {

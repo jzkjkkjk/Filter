@@ -1,35 +1,24 @@
 package com.renrenche.filterlibrary;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class FilterAdapter extends BaseAdapter {
+public final class FilterAdapter extends BaseAdapter {
 
     private List<FilterItemModel> mData;
     private Context mContext;
+    private int mItemLayoutId;
 
-    public FilterAdapter(List<FilterItemModel> data, Context context) {
+    public FilterAdapter(List<FilterItemModel> data, int itemLayoutId) {
         mData = data;
-        mContext = context;
-    }
-
-    public void refreshData(List<FilterItemModel> data) {
-        if (mData != null) {
-            mData.clear();
-        } else {
-            mData = new ArrayList<>();
+        mItemLayoutId = itemLayoutId;
+        if (mItemLayoutId < 0) {
+            throw new IllegalArgumentException("Item layout must be specify!");
         }
-        if (data != null) {
-            mData.addAll(data);
-        }
-        notifyDataSetChanged();
     }
 
     @Override
@@ -42,23 +31,24 @@ public class FilterAdapter extends BaseAdapter {
         return mData == null ? null : mData.get(position);
     }
 
+    void setContext(Context context) {
+        mContext = context;
+    }
+
     @Override
     public long getItemId(int position) {
         return position;
     }
 
     @Override
-    public TextView getView(int position, View convertView, ViewGroup parent) {
-
-        TextView item;
+    public View getView(int position, View convertView, ViewGroup parent) {
+        IFilterItemV item;
         if (convertView == null) {
-            item = new TextView(mContext);
-            item.setTextColor(Color.BLACK);
-            item.setPadding(40, 40, 0, 40);
+            item = (IFilterItemV) View.inflate(mContext, mItemLayoutId, null);
         } else {
-            item = (TextView) convertView;
+            item = (IFilterItemV) convertView;
         }
-        item.setText(getItem(position).mValue);
-        return item;
+        item.setValue(getItem(position).mValue);
+        return (View) item;
     }
 }

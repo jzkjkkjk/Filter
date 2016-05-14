@@ -3,6 +3,7 @@ package com.renrenche.filterlibrary;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -10,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -32,6 +32,10 @@ public class MultipleFilter extends FrameLayout {
     private Filter mCurAnimatingFilter;
     private int mDimenModel;
     private Paint mPaint;
+    private int mHeaderSelector;
+    private int mItemLayoutId;
+    private int mHeaderTextColor;
+    private float mHeaderTextSize;
 
     public MultipleFilter(Context context) {
         this(context, null);
@@ -54,11 +58,19 @@ public class MultipleFilter extends FrameLayout {
 
     private void init(Context context, AttributeSet attrs) {
         mDensity = getResources().getDisplayMetrics().density;
-        mPaint = new Paint();
-        mPaint.setTextSize(20);
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.Filter);
         mDimenModel = typedArray.getInt(R.styleable.Filter_dimen_model, DIMEN_MODEL_AVERAGE);
+        mHeaderSelector = typedArray.getResourceId(R.styleable.Filter_header_selector, -1);
+        mItemLayoutId = typedArray.getResourceId(R.styleable.Filter_item_layout, -1);
+        if (mItemLayoutId < 0) {
+            throw new IllegalArgumentException("Item layout must be specify!");
+        }
+        mHeaderTextColor = typedArray.getColor(R.styleable.Filter_header_text_color, Color.DKGRAY);
+        mHeaderTextSize = typedArray.getDimension(R.styleable.Filter_header_text_size, 18);
         typedArray.recycle();
+
+        mPaint = new Paint();
+        mPaint.setTextSize(mHeaderTextSize);
     }
 
     @Override
@@ -88,7 +100,6 @@ public class MultipleFilter extends FrameLayout {
                     if (mCurAnimatingFilter == null && mCurOpenedFilter != null) {
                         mCurOpenedFilter.close();
                     }
-                    Toast.makeText(v.getContext(), "onClick", Toast.LENGTH_SHORT).show();
                 }
             });
             mMaskView.setClickable(false);
@@ -146,7 +157,10 @@ public class MultipleFilter extends FrameLayout {
         if (mMaskView != null) {
             item.setMask(mMaskView);
         }
-        item.setAdapter(new FilterAdapter(mAdapter.getItemValue(index), getContext()));
+        item.setHeaderSelector(mHeaderSelector);
+        item.setHeaderTextColor(mHeaderTextColor);
+        item.setHeaderTextSize(mHeaderTextSize);
+        item.setAdapter(new FilterAdapter(mAdapter.getItemValue(index), mItemLayoutId));
         item.setOnFilterStatusChangedListener(new Filter.OnFilterStatusChangedListener() {
 
             @Override
