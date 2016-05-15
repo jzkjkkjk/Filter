@@ -9,7 +9,6 @@ import android.os.Build;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import java.util.List;
@@ -17,7 +16,7 @@ import java.util.List;
 /**
  * Created by jiazhenkai on 16/5/13.
  */
-public class MultipleFilter extends FrameLayout {
+public class MultipleFilter extends AbsFilter<MultipleFilterAdapter> {
 
     private static final int DIMEN_MODEL_MASK = 0xff;
     public static final int DIMEN_MODEL_AVERAGE = 1 << 0;
@@ -27,7 +26,6 @@ public class MultipleFilter extends FrameLayout {
     private OnFilterItemClickListener mOnFilterItemClickListener;
     private LinearLayout mFilterContainer;
     private View mMaskView;
-    private float mDensity;
     private Filter mCurOpenedFilter;
     private Filter mCurAnimatingFilter;
     private int mDimenModel;
@@ -58,7 +56,6 @@ public class MultipleFilter extends FrameLayout {
     }
 
     private void init(Context context, AttributeSet attrs) {
-        mDensity = getResources().getDisplayMetrics().density;
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.Filter);
         mItemLayoutId = typedArray.getResourceId(R.styleable.Filter_item_layout, -1);
         if (mItemLayoutId < 0) {
@@ -78,24 +75,36 @@ public class MultipleFilter extends FrameLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+
         int count = getChildCount();
-        for (int i = 0; i < count; i++) {
-            View child = getChildAt(i);
+        if (count > 1) {
+            throw new RuntimeException("MultipleFilter can only has one child at most!");
+        } else if (count == 1) {
+            View child = getChildAt(0);
             LayoutParams cLp = (LayoutParams) child.getLayoutParams();
             cLp.topMargin = cLp.topMargin + mHeaderHeight;
         }
 
-        setMask(findViewById(R.id.filter_mask));
+
+        mMaskView = new View(getContext());
+        addView(mMaskView, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        LayoutParams mLp = (LayoutParams) mMaskView.getLayoutParams();
+        mLp.topMargin = mHeaderHeight;
+        setMask(mMaskView);
 
         mFilterContainer = new LinearLayout(getContext());
         mFilterContainer.setOrientation(LinearLayout.HORIZONTAL);
         addView(mFilterContainer, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
     }
 
+    @Override
     public void setMask(View mask) {
+        if (mMaskView != null && mMaskView.getParent().equals(this) && mask != mMaskView) {
+            removeView(mMaskView);
+            mMaskView = null;
+        }
         mMaskView = mask;
         if (mMaskView != null) {
-            mMaskView.getBackground().setAlpha(0);
             mMaskView.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -115,6 +124,7 @@ public class MultipleFilter extends FrameLayout {
         }
     }
 
+    @Override
     public void setAdapter(MultipleFilterAdapter adapter) {
         mAdapter = adapter;
         if (mAdapter != null && mAdapter.getCount() > 0) {
@@ -169,13 +179,17 @@ public class MultipleFilter extends FrameLayout {
             @Override
             public void onFilterOpened(Filter filter) {
                 mCurOpenedFilter = filter;
-                mMaskView.setClickable(true);
+                if (mMaskView != null) {
+                    mMaskView.setClickable(true);
+                }
             }
 
             @Override
             public void onFilterClosed(Filter filter) {
                 mCurOpenedFilter = null;
-                mMaskView.setClickable(false);
+                if (mMaskView != null) {
+                    mMaskView.setClickable(false);
+                }
             }
 
             @Override
@@ -207,22 +221,21 @@ public class MultipleFilter extends FrameLayout {
         }
     }
 
+    @Override
     public boolean isAnimating() {
         return mCurAnimatingFilter != null && mCurAnimatingFilter.isAnimating();
     }
 
+    @Override
     public boolean isOpened() {
         return mCurOpenedFilter != null && mCurOpenedFilter.isOpened();
     }
 
+    @Override
     public void close() {
         if (mCurOpenedFilter != null) {
             mCurOpenedFilter.close();
             mCurOpenedFilter = null;
         }
-    }
-
-    private int dp2Pixel(float dp) {
-        return (int) (dp * mDensity + 0.5f);
     }
 }

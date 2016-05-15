@@ -1,10 +1,10 @@
 package com.renrenche.filter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.util.ArrayMap;
 import android.view.Gravity;
 import android.view.View;
@@ -23,7 +23,7 @@ import com.renrenche.filterlibrary.OnFilterItemClickListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends FragmentActivity {
+public class SecondActivity extends Activity {
 
     private MultipleFilter mFilter;
     private ListView mLv;
@@ -31,13 +31,14 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_second);
+
         mFilter = (MultipleFilter) findViewById(R.id.filter);
         ArrayMap<String, List<FilterItemModel>> data = new ArrayMap<>();
         for (int i = 0; i < 3; i++) {
             String title = "测试" + i;
             List<FilterItemModel> value = new ArrayList<>();
-            for (int j = 0; j < 5; j++) {
+            for (int j = 0; j < 3; j++) {
                 String valueStr = title + "的内容" + j;
                 FilterItemModel model = new FilterItemModel();
                 model.mTitle = title;
@@ -50,19 +51,18 @@ public class MainActivity extends FragmentActivity {
         mFilter.setOnFilterItemClickListener(new OnFilterItemClickListener() {
             @Override
             public void onFilterItemClick(String category, String value) {
-                Toast.makeText(MainActivity.this, category + ":" + value, Toast.LENGTH_SHORT).show();
+                Toast.makeText(SecondActivity.this, category + ":" + value, Toast.LENGTH_SHORT).show();
             }
         });
-        mFilter.setMask(findViewById(R.id.filter_mask));
 
         mLv = (ListView) findViewById(R.id.lv);
         mLv.setAdapter(new Adapter(this));
         mLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, SecondActivity.class);
+                Intent intent = new Intent(SecondActivity.this, ThirdActivity.class);
                 startActivity(intent);
-                Toast.makeText(MainActivity.this, mLv.getAdapter().getItem(position).toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(SecondActivity.this, mLv.getAdapter().getItem(position).toString(), Toast.LENGTH_SHORT).show();
             }
         });
     }

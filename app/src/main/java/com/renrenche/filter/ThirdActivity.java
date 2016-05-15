@@ -1,11 +1,9 @@
 package com.renrenche.filter;
 
+import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.util.ArrayMap;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,54 +13,49 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.renrenche.filterlibrary.Filter;
+import com.renrenche.filterlibrary.FilterAdapter;
 import com.renrenche.filterlibrary.FilterItemModel;
-import com.renrenche.filterlibrary.MultipleFilter;
-import com.renrenche.filterlibrary.MultipleFilterAdapter;
 import com.renrenche.filterlibrary.OnFilterItemClickListener;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends FragmentActivity {
+public class ThirdActivity extends Activity {
 
-    private MultipleFilter mFilter;
+    private Filter mFilter;
     private ListView mLv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        mFilter = (MultipleFilter) findViewById(R.id.filter);
-        ArrayMap<String, List<FilterItemModel>> data = new ArrayMap<>();
-        for (int i = 0; i < 3; i++) {
-            String title = "测试" + i;
-            List<FilterItemModel> value = new ArrayList<>();
-            for (int j = 0; j < 5; j++) {
-                String valueStr = title + "的内容" + j;
-                FilterItemModel model = new FilterItemModel();
-                model.mTitle = title;
-                model.mValue = valueStr;
-                value.add(model);
-            }
-            data.put(title, value);
+        setContentView(R.layout.activity_third);
+
+        mFilter = (Filter) findViewById(R.id.filter);
+        String title = "测试";
+        List<FilterItemModel> data = new ArrayList<>();
+        for (int j = 0; j < 3; j++) {
+            String valueStr = title + "的内容" + j;
+            FilterItemModel model = new FilterItemModel();
+            model.mTitle = title;
+            model.mValue = valueStr;
+            data.add(model);
         }
-        mFilter.setAdapter(new MultipleFilterAdapter(data, new int[]{400, 400, 400}));
+        mFilter.setTitle(title);
+        mFilter.setAdapter(new FilterAdapter(data, R.layout.item_filter));
         mFilter.setOnFilterItemClickListener(new OnFilterItemClickListener() {
             @Override
             public void onFilterItemClick(String category, String value) {
-                Toast.makeText(MainActivity.this, category + ":" + value, Toast.LENGTH_SHORT).show();
+                Toast.makeText(ThirdActivity.this, category + ":" + value, Toast.LENGTH_SHORT).show();
+
             }
         });
-        mFilter.setMask(findViewById(R.id.filter_mask));
-
         mLv = (ListView) findViewById(R.id.lv);
         mLv.setAdapter(new Adapter(this));
         mLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, SecondActivity.class);
-                startActivity(intent);
-                Toast.makeText(MainActivity.this, mLv.getAdapter().getItem(position).toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(ThirdActivity.this, mLv.getAdapter().getItem(position).toString(), Toast.LENGTH_SHORT).show();
             }
         });
     }

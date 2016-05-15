@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by jzkcan on 2016/5/13.
  */
-public class MultipleFilterAdapter {
+public final class MultipleFilterAdapter {
 
     private ArrayMap<String, List<FilterItemModel>> mData;
     private int[] mWidthDimens;
