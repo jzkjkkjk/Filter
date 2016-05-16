@@ -6,6 +6,7 @@ import android.animation.IntEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Build;
@@ -355,9 +356,9 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
     }
 
     @Override
-    protected void onWindowVisibilityChanged(int visibility) {
-        super.onWindowVisibilityChanged(visibility);
-        if (visibility == INVISIBLE && isOpened()) {//home 键收回
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (isOpened()) {//窗口退至后台
             close();
         }
     }
