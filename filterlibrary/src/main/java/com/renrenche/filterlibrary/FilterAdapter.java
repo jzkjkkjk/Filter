@@ -1,6 +1,5 @@
 package com.renrenche.filterlibrary;
 
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -37,14 +36,15 @@ public final class FilterAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        Log.e("test", "getView");
         IFilterItemV item;
         if (convertView == null) {
             item = (IFilterItemV) View.inflate(parent.getContext(), mItemLayoutId, null);
         } else {
             item = (IFilterItemV) convertView;
         }
-        item.setValue(getItem(position).mValue);
+        String value = getItem(position).mValue;
+        item.setValue(value);
+        ((View) item).setTag(value);
         return (View) item;
     }
 }

@@ -28,4 +28,9 @@ public class FilterItemView extends LinearLayout implements IFilterItemV {
     public void setValue(String value) {
         mValueTv.setText(value);
     }
+
+    @Override
+    public void setSelect(boolean selected) {
+        setSelected(selected);
+    }
 }

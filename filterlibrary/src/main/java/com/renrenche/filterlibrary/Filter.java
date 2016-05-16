@@ -10,7 +10,6 @@ import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -18,20 +17,19 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 /**
  * Created by jiazhenkai on 16/4/20.
  */
 public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickListener {
 
-    private static final int ANIM_DURATION = 300;
+    private static final int ANIM_DURATION = 250;
     private static final int ALPHA_THRESHOLD = 128;
     private boolean mIsOpened;
     private boolean mIsAnimating;
     private ListView mContentView;
     private RelativeLayout mHeaderView;
-    private TextView mTitleView;
+    private SimpleTextView mTitleView;
     private View mIndicator;
     private View mMaskView;
     private ValueAnimator mBgAlphaOpenVam;
@@ -79,7 +77,6 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
         if (!mIsFromXml) {
             initView(context);
         }
-
 
         mBgAlphaOpenVam = ValueAnimator.ofInt(0, ALPHA_THRESHOLD);
         mBgAlphaOpenVam.setEvaluator(new IntEvaluator());
@@ -161,11 +158,10 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
             }
         });
 
-        TextView titleView = new TextView(context);
+        SimpleTextView titleView = new SimpleTextView(context);
         mTitleView = titleView;
         setSelector(mHeaderView, mHeaderSelector);
-        titleView.setPadding(0, dp2Pixel(15), 0, dp2Pixel(15));//TODO title text padding
-        mHeaderView.addView(titleView);
+        mHeaderView.addView(titleView, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         RelativeLayout.LayoutParams titleRlp = (RelativeLayout.LayoutParams) titleView.getLayoutParams();
         titleRlp.addRule(RelativeLayout.CENTER_IN_PARENT);
 
@@ -185,12 +181,21 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
         mContentView.setDividerHeight(1);
         mContentView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+
                 close();
+                setItemSelect(false);
+                mTitleView.setText(mAdapter.getItem(position).mValue);
+                setItemSelect(true);
+
                 if (mOnFilterItemClickListener != null) {
-                    FilterItemModel item = mAdapter.getItem(position);
-                    mTitleView.setText(item.mValue);
-                    mOnFilterItemClickListener.onFilterItemClick(item.mTitle, item.mValue);
+                    postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            FilterItemModel item = mAdapter.getItem(position);
+                            mOnFilterItemClickListener.onFilterItemClick(item.mTitle, item.mValue);
+                        }
+                    }, ANIM_DURATION);
                 }
             }
         });
@@ -199,7 +204,7 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
 
     @Override
     public void close() {
-        mContentView.animate().translationY(-mContentView.getHeight()).setDuration(ANIM_DURATION).start();
+        mContentView.animate().translationY(-mContentView.getHeight() - 1).setDuration(ANIM_DURATION).start();
         mBgAlphaCloseVam.start();
         mIndicator.animate().rotation(0).setDuration(ANIM_DURATION).setListener(new AnimatorListenerAdapter() {
             @Override
@@ -229,6 +234,7 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
         mIndicator.animate().rotation(180).setDuration(ANIM_DURATION).setListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationStart(Animator animation) {
+                setItemSelect(true);
                 mIsAnimating = true;
                 if (mOnFilterStatusChangedListener != null) {
                     mOnFilterStatusChangedListener.onFilterAnimating(Filter.this);
@@ -258,13 +264,12 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
         return !mIsAnimating && mIsOpened;
     }
 
-
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         super.onLayout(changed, l, t, r, b);
-        if (!isOpened() && mHeaderHeight > 0 && mContentView.getTop() >= mHeaderHeight) {
-            Log.e("test", "onLayout");
-            mContentView.animate().translationY(-mContentView.getHeight()).setDuration(0).start();
+        //确保第一次初始化时隐藏筛选列表
+        if (!isOpened() && mHeaderHeight > 0 && mContentView.getHeight() > 0 && mContentView.getY() > mHeaderHeight) {
+            mContentView.animate().translationY(-mContentView.getHeight() - 1).setDuration(0).start();
         }
     }
 
@@ -318,7 +323,7 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
         mTitleView.setTextSize(size);
     }
 
-    public void setTitle(CharSequence title) {
+    public void setTitle(String title) {
         mTitleView.setText(title);
     }
 
@@ -346,6 +351,21 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
     private void setSelector(View target, int selector) {
         if (selector > 0) {
             target.setBackgroundResource(selector);
+        }
+    }
+
+    @Override
+    protected void onWindowVisibilityChanged(int visibility) {
+        super.onWindowVisibilityChanged(visibility);
+        if (visibility == INVISIBLE && isOpened()) {//home 键收回
+            close();
+        }
+    }
+
+    private void setItemSelect(boolean selected) {
+        IFilterItemV itemView = (IFilterItemV) mContentView.findViewWithTag(mTitleView.getText());
+        if (itemView != null) {
+            itemView.setSelect(selected);
         }
     }
 

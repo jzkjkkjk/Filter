@@ -2,60 +2,11 @@
 <items version="2" >
 
     <item
-        jar="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/exploded-aar/com.android.support/support-v4/24.0.0-alpha1/jars/classes.jar"
-        jumboMode="true"
+        jar="F:\Filter\app\build\intermediates\exploded-aar\Filter\filterlibrary\unspecified\jars\classes.jar"
+        jumboMode="false"
         revision="23.0.2"
-        sha1="9aaaea3a89040f8176f810c85e288fc74d5d1f12">
-        <dex dex="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-support-v4-24.0.0-alpha1_92784b30e824e2b3a55d4a28cc458f6759584072/classes.dex" />
-    </item>
-    <item
-        jar="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/exploded-aar/com.android.support/support-vector-drawable/24.0.0-alpha1/jars/classes.jar"
-        jumboMode="true"
-        revision="23.0.2"
-        sha1="ed88e1f0c8fbf66e1da918545f0a6790f893bceb">
-        <dex dex="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-support-vector-drawable-24.0.0-alpha1_7a4ce53f1a61c7d9f0aeb7060204a55e5ceab48a/classes.dex" />
-    </item>
-    <item
-        jar="/Users/jiazhenkai/Library/Android/sdk/extras/android/m2repository/com/android/support/support-annotations/24.0.0-alpha1/support-annotations-24.0.0-alpha1.jar"
-        jumboMode="true"
-        revision="23.0.2"
-        sha1="b8062546971a3d196343232a19a3c0016272ba47">
-        <dex dex="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/transforms/dex/debug/folders/1000/10/support-annotations-24.0.0-alpha1_9e570c2af94f1bb6db20812bfab478331f13e9e1/classes.dex" />
-    </item>
-    <item
-        jar="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/exploded-aar/com.android.support/appcompat-v7/24.0.0-alpha1/jars/classes.jar"
-        jumboMode="true"
-        revision="23.0.2"
-        sha1="9684c95278dc45a142d7de3db9e7e39aa520e1e0">
-        <dex dex="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-appcompat-v7-24.0.0-alpha1_ec8efb8d6a81396dc1cd38facfbfded0e93afff9/classes.dex" />
-    </item>
-    <item
-        jar="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/incremental-runtime-classes/debug/instant-run.jar"
-        jumboMode="true"
-        revision="23.0.2"
-        sha1="287f6ede2ea0c8e5443ae725dc7660d44c953aec">
-        <dex dex="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run_39614a8fa185157870c33957650c0d543a9e6bbf/classes.dex" />
-    </item>
-    <item
-        jar="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/incremental-classes/debug/instant-run-bootstrap.jar"
-        jumboMode="true"
-        revision="23.0.2"
-        sha1="1c627784f4f81d5b282d79aecb7771df9d734f0f">
-        <dex dex="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/transforms/dex/debug/folders/1000/10/instant-run-bootstrap_5cf067f60e89da9cde4cb2d85a13fa93ce76cd2e/classes.dex" />
-    </item>
-    <item
-        jar="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/exploded-aar/com.android.support/support-v4/24.0.0-alpha1/jars/libs/internal_impl-24.0.0-alpha1.jar"
-        jumboMode="true"
-        revision="23.0.2"
-        sha1="e57fba0a2d57d3501d8f4ff44c23092978804845">
-        <dex dex="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/transforms/dex/debug/folders/1000/10/internal_impl-24.0.0-alpha1_ee477273f02ddb5a4f13eaf53d2325e977f9b0af/classes.dex" />
-    </item>
-    <item
-        jar="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/exploded-aar/com.android.support/animated-vector-drawable/24.0.0-alpha1/jars/classes.jar"
-        jumboMode="true"
-        revision="23.0.2"
-        sha1="a6af5beedc2e8c946abc3771525e2fed77439309">
-        <dex dex="/Users/jiazhenkai/Documents/renrenche/Filter/app/build/intermediates/transforms/dex/debug/folders/1000/10/com.android.support-animated-vector-drawable-24.0.0-alpha1_85f709484c0d777c1838d5f29ce908fdd674922b/classes.dex" />
+        sha1="6eb1ba2a203218042f17aba8815d6e00289e125a">
+        <dex dex="F:\Filter\app\build\intermediates\pre-dexed\debug\Filter-filterlibrary-unspecified_c624251ad13fbeb1eb03592ceb82f7eb90aaeab7.jar" />
     </item>
 
 </items>

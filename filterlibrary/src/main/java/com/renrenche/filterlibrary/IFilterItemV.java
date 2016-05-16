@@ -5,4 +5,5 @@ package com.renrenche.filterlibrary;
  */
 public interface IFilterItemV {
     void setValue(String value);
+    void setSelect(boolean selected);
 }
