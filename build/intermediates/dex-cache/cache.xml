@@ -2,11 +2,53 @@
 <items version="2" >
 
     <item
+        jar="F:\Filter\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.3.0\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.2"
+        sha1="8a034dd16c0dfd75fe86c52c2cd581592acc684a">
+        <dex dex="F:\Filter\app\build\intermediates\pre-dexed\release\com.android.support-support-v4-23.3.0_f2b6066d3e690ac070dd28b7e7ddc5bc56c65acb.jar" />
+    </item>
+    <item
+        jar="F:\Filter\app\build\intermediates\exploded-aar\com.android.support\support-v4\23.3.0\jars\libs\internal_impl-23.3.0.jar"
+        jumboMode="false"
+        revision="23.0.2"
+        sha1="4da5a4d697d32497c6f85567a5112e62fdfd0676">
+        <dex dex="F:\Filter\app\build\intermediates\pre-dexed\release\internal_impl-23.3.0_68ee5d96415ab58d2c89ed38c823d9a5ff234c8e.jar" />
+    </item>
+    <item
+        jar="E:\AndroidStudio\sdk\extras\android\m2repository\com\android\support\support-annotations\23.3.0\support-annotations-23.3.0.jar"
+        jumboMode="false"
+        revision="23.0.2"
+        sha1="db7791d75a07fef9844d06236c1c59ba7bf6997c">
+        <dex dex="F:\Filter\app\build\intermediates\pre-dexed\release\support-annotations-23.3.0_70079f01f3c7375e7aa4bbfd2b6e3cad0df2dd5f.jar" />
+    </item>
+    <item
+        jar="F:\Filter\app\build\intermediates\exploded-aar\com.android.support\support-vector-drawable\23.2.1\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.2"
+        sha1="673d77a5bbddd766037f088e775df525c46407f0">
+        <dex dex="F:\Filter\app\build\intermediates\pre-dexed\release\com.android.support-support-vector-drawable-23.2.1_17904f210dde4d5baf02c3381b1233e0df47bd0f.jar" />
+    </item>
+    <item
+        jar="F:\Filter\app\build\intermediates\exploded-aar\com.android.support\appcompat-v7\23.2.1\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.2"
+        sha1="e4d0cbb0b999604b349062f0214a0a228a7fd151">
+        <dex dex="F:\Filter\app\build\intermediates\pre-dexed\release\com.android.support-appcompat-v7-23.2.1_4bbb59ff141bbab5c9885e9555d885167a033b0a.jar" />
+    </item>
+    <item
         jar="F:\Filter\app\build\intermediates\exploded-aar\Filter\filterlibrary\unspecified\jars\classes.jar"
         jumboMode="false"
         revision="23.0.2"
-        sha1="de859c9c44639332d1aa4d46f54ac361f5d5da4b">
-        <dex dex="F:\Filter\app\build\intermediates\pre-dexed\debug\Filter-filterlibrary-unspecified_c624251ad13fbeb1eb03592ceb82f7eb90aaeab7.jar" />
+        sha1="a0e3b529867ffee4627c15bff1bc9c7f06f3da10">
+        <dex dex="F:\Filter\app\build\intermediates\pre-dexed\release\Filter-filterlibrary-unspecified_c624251ad13fbeb1eb03592ceb82f7eb90aaeab7.jar" />
+    </item>
+    <item
+        jar="F:\Filter\app\build\intermediates\exploded-aar\com.android.support\animated-vector-drawable\23.2.1\jars\classes.jar"
+        jumboMode="false"
+        revision="23.0.2"
+        sha1="3469cb457f10f74c28cbc05f069b6c894f6cbdd0">
+        <dex dex="F:\Filter\app\build\intermediates\pre-dexed\release\com.android.support-animated-vector-drawable-23.2.1_3d0f55013ac406bede93ce8941846b963a7bc965.jar" />
     </item>
 
 </items>
