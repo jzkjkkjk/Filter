@@ -5,6 +5,7 @@ import android.util.AttributeSet;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.renrenche.filterlibrary.FilterItemModel;
 import com.renrenche.filterlibrary.IFilterItemV;
 
 /**
@@ -25,8 +26,8 @@ public class FilterItemView extends LinearLayout implements IFilterItemV {
     }
 
     @Override
-    public void setValue(String value) {
-        mValueTv.setText(value);
+    public void setValue(FilterItemModel value) {
+        mValueTv.setText(value.mValue);
     }
 
     @Override

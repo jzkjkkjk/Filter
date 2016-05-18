@@ -35,18 +35,15 @@ public class ThirdActivity extends Activity {
         String title = "测试";
         List<FilterItemModel> data = new ArrayList<>();
         for (int j = 0; j < 3; j++) {
-            String valueStr = title + "的内容" + j;
-            FilterItemModel model = new FilterItemModel();
-            model.mTitle = title;
-            model.mValue = valueStr;
+            FilterItemModel model = new FilterItemModel(title + "的内容" + j);
             data.add(model);
         }
         mFilter.setTitle(title);
         mFilter.setAdapter(new FilterAdapter(data, R.layout.item_filter));
         mFilter.setOnFilterItemClickListener(new OnFilterItemClickListener() {
             @Override
-            public void onFilterItemClick(String category, String value) {
-                Toast.makeText(ThirdActivity.this, category + ":" + value, Toast.LENGTH_SHORT).show();
+            public void onFilterItemClick(String category, FilterItemModel value) {
+                Toast.makeText(ThirdActivity.this, category + ":" + value.mValue, Toast.LENGTH_SHORT).show();
 
             }
         });

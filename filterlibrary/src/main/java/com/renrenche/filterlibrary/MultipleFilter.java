@@ -117,7 +117,7 @@ public class MultipleFilter extends AbsFilter<MultipleFilterAdapter> {
             if (mAdapter != null && mAdapter.getCount() > 0) {
                 int count = mAdapter.getCount();
                 for (int i = 0; i < count; i++) {
-                    Filter item = (Filter) findViewWithTag(mAdapter.getItemKey(i));
+                    Filter item = (Filter) findViewWithTag(mAdapter.getItemCategory(i));
                     item.setMask(mMaskView);
                 }
             }
@@ -131,8 +131,10 @@ public class MultipleFilter extends AbsFilter<MultipleFilterAdapter> {
             int count = mAdapter.getCount();
             for (int i = 0; i < count; i++) {
                 Filter item = new Filter(getContext());
-                item.setTag(mAdapter.getItemKey(i));
-                item.setTitle(mAdapter.getItemKey(i));
+                String itemCategory = mAdapter.getItemCategory(i);
+                item.setTag(itemCategory);
+                item.setTitle(mAdapter.getItemValue(i).get(0).mValue);
+                item.setCategory(itemCategory);
                 addItem(item, i);
             }
         }
@@ -215,7 +217,7 @@ public class MultipleFilter extends AbsFilter<MultipleFilterAdapter> {
         if (mAdapter != null && mAdapter.getCount() > 0) {
             int count = mAdapter.getCount();
             for (int i = 0; i < count; i++) {
-                Filter item = (Filter) findViewWithTag(mAdapter.getItemKey(i));
+                Filter item = (Filter) findViewWithTag(mAdapter.getItemCategory(i));
                 item.setOnFilterItemClickListener(mOnFilterItemClickListener);
             }
         }

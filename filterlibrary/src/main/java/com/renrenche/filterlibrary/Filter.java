@@ -46,6 +46,7 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
     private float mHeaderTextSize;
 
     private boolean mIsFromXml;
+    private String mCategory;
 
     public Filter(Context context) {
         this(context, null, 0);
@@ -173,7 +174,7 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
         RelativeLayout.LayoutParams indicatorRlp = (RelativeLayout.LayoutParams) headerIndicator.getLayoutParams();
         indicatorRlp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
         indicatorRlp.addRule(RelativeLayout.CENTER_VERTICAL);
-        indicatorRlp.rightMargin = dp2Pixel(15);//TODO indicator img margin right
+        indicatorRlp.rightMargin = dp2Pixel(10);//TODO indicator img margin right
         return mHeaderView;
     }
 
@@ -194,7 +195,7 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
                         @Override
                         public void run() {
                             FilterItemModel item = mAdapter.getItem(position);
-                            mOnFilterItemClickListener.onFilterItemClick(item.mTitle, item.mValue);
+                            mOnFilterItemClickListener.onFilterItemClick(mCategory, item);
                         }
                     }, ANIM_DURATION);
                 }
@@ -326,6 +327,10 @@ public class Filter extends AbsFilter<FilterAdapter> implements View.OnClickList
 
     public void setTitle(String title) {
         mTitleView.setText(title);
+    }
+
+    public void setCategory(String category) {
+        mCategory = category;
     }
 
     public void setOnFilterItemClickListener(OnFilterItemClickListener listener) {

@@ -42,9 +42,9 @@ public final class FilterAdapter extends BaseAdapter {
         } else {
             item = (IFilterItemV) convertView;
         }
-        String value = getItem(position).mValue;
+        FilterItemModel value = getItem(position);
         item.setValue(value);
-        ((View) item).setTag(value);
+        ((View) item).setTag(value.mValue);
         return (View) item;
     }
 }

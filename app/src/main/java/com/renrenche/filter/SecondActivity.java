@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.v4.util.ArrayMap;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.renrenche.filterlibrary.FilterItemModel;
+import com.renrenche.filterlibrary.FilterMap;
 import com.renrenche.filterlibrary.MultipleFilter;
 import com.renrenche.filterlibrary.MultipleFilterAdapter;
 import com.renrenche.filterlibrary.OnFilterItemClickListener;
@@ -34,15 +34,23 @@ public class SecondActivity extends Activity {
         setContentView(R.layout.activity_second);
 
         mFilter = (MultipleFilter) findViewById(R.id.filter);
-        ArrayMap<String, List<FilterItemModel>> data = new ArrayMap<>();
+        FilterMap data = new FilterMap();
         for (int i = 0; i < 3; i++) {
-            String title = "测试" + i;
+            String title = null;
+            switch (i) {
+                case 0:
+                    title = "状态";
+                    break;
+                case 1:
+                    title = "时间";
+                    break;
+                case 2:
+                    title = "编号";
+                    break;
+            }
             List<FilterItemModel> value = new ArrayList<>();
             for (int j = 0; j < 3; j++) {
-                String valueStr = title + "的内容" + j;
-                FilterItemModel model = new FilterItemModel();
-                model.mTitle = title;
-                model.mValue = valueStr;
+                FilterItemModel model = new FilterItemModel(title + "的内容" + j);
                 value.add(model);
             }
             data.put(title, value);
@@ -50,8 +58,8 @@ public class SecondActivity extends Activity {
         mFilter.setAdapter(new MultipleFilterAdapter(data, new int[]{400, 400, 400}));
         mFilter.setOnFilterItemClickListener(new OnFilterItemClickListener() {
             @Override
-            public void onFilterItemClick(String category, String value) {
-                Toast.makeText(SecondActivity.this, category + ":" + value, Toast.LENGTH_SHORT).show();
+            public void onFilterItemClick(String category, FilterItemModel value) {
+                Toast.makeText(SecondActivity.this, category + ":" + value.mValue, Toast.LENGTH_SHORT).show();
             }
         });
 

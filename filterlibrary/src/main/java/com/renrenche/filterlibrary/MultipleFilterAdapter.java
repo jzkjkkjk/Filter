@@ -1,7 +1,5 @@
 package com.renrenche.filterlibrary;
 
-import android.support.v4.util.ArrayMap;
-
 import java.util.List;
 
 /**
@@ -9,14 +7,14 @@ import java.util.List;
  */
 public final class MultipleFilterAdapter {
 
-    private ArrayMap<String, List<FilterItemModel>> mData;
+    private FilterMap mData;
     private int[] mWidthDimens;
 
-    public MultipleFilterAdapter(ArrayMap<String, List<FilterItemModel>> data) {
+    public MultipleFilterAdapter(FilterMap data) {
         this(data, null);
     }
 
-    public MultipleFilterAdapter(ArrayMap<String, List<FilterItemModel>> data, int[] widthDimens) {
+    public MultipleFilterAdapter(FilterMap data, int[] widthDimens) {
         mData = data;
         mWidthDimens = widthDimens;
         if (widthDimens != null && data != null) {
@@ -26,19 +24,19 @@ public final class MultipleFilterAdapter {
         }
     }
 
-    public int getCount() {
+    int getCount() {
         return mData.size();
     }
 
-    public String getItemKey(int position) {
+    String getItemCategory(int position) {
         return mData.keyAt(position);
     }
 
-    public List<FilterItemModel> getItemValue(int position) {
-        return mData.get(mData.keyAt(position));
+    List<FilterItemModel> getItemValue(int position) {
+        return mData.valueAt(position);
     }
 
-    public int getItemWidthDimen(int position) {
+    int getItemWidthDimen(int position) {
         int temp = mWidthDimens == null ? -1 : mWidthDimens[position];
         if (temp < 0) {
             throw new IllegalArgumentException("Width dimention cannot be negative");
