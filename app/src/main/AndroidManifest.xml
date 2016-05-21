@@ -24,6 +24,7 @@
             android:name=".ThirdActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="landscape" />
+        <activity android:name="com.renrenche.fabexpanablemenu.FabMenuActivity"></activity>
     </application>
 
 </manifest>

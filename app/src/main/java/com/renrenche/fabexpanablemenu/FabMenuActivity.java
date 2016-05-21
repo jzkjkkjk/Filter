@@ -1,8 +1,7 @@
-package com.renrenche.filter;
+package com.renrenche.fabexpanablemenu;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -14,54 +13,43 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.renrenche.fabexpanablemenu.FabMenuActivity;
-import com.renrenche.filterlibrary.Filter;
-import com.renrenche.filterlibrary.FilterAdapter;
-import com.renrenche.filterlibrary.FilterItemModel;
-import com.renrenche.filterlibrary.OnFilterItemClickListener;
+import com.renrenche.filter.R;
 
-import java.util.ArrayList;
-import java.util.List;
+public class FabMenuActivity extends Activity {
 
-public class ThirdActivity extends Activity {
-
-    private Filter mFilter;
     private ListView mLv;
+    private FabExpandableMenu mFabExpandableMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_third);
+        setContentView(R.layout.activity_fab_menu);
 
-        mFilter = (Filter) findViewById(R.id.filter);
-        String title = "测试";
-        List<FilterItemModel> data = new ArrayList<>();
-        for (int j = 0; j < 3; j++) {
-            FilterItemModel model = new FilterItemModel(title + "的内容" + j);
-            data.add(model);
-        }
-        mFilter.setTitle(title);
-        mFilter.setAdapter(new FilterAdapter(data, R.layout.item_filter));
-        mFilter.setOnFilterItemClickListener(new OnFilterItemClickListener() {
-            @Override
-            public void onFilterItemClick(String category, FilterItemModel value) {
-                Toast.makeText(ThirdActivity.this, category + ":" + value.mValue, Toast.LENGTH_SHORT).show();
-            }
-        });
         mLv = (ListView) findViewById(R.id.lv);
         mLv.setAdapter(new Adapter(this));
         mLv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(ThirdActivity.this, FabMenuActivity.class);
-                startActivity(intent);
+                Toast.makeText(FabMenuActivity.this, position + "", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        mFabExpandableMenu = (FabExpandableMenu) findViewById(R.id.fab_menu);
+        mFabExpandableMenu.setSwitcherSrcId(R.mipmap.ic_apply_to_see);
+        mFabExpandableMenu.setAdapter(new FabExpandableMenu.MenuAdapter(new String[]{"测试一", "测试二二", "测试三三三", "测试四四四四"}));
+        mFabExpandableMenu.setOnItemClickListener(new FabExpandableMenu.OnItemClickListener() {
+            @Override
+            public void onItemClick(String title) {
+                Toast.makeText(FabMenuActivity.this, title, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     @Override
     public void onBackPressed() {
-        if (mFilter.canGoBack()) {
+        if (mFabExpandableMenu.isMenuOpen()) {
+            mFabExpandableMenu.menuClose();
+        } else {
             super.onBackPressed();
         }
     }
