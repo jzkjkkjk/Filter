@@ -9,13 +9,7 @@
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
-            android:screenOrientation="landscape">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:screenOrientation="landscape"></activity>
         <activity
             android:name=".SecondActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
@@ -24,7 +18,14 @@
             android:name=".ThirdActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:screenOrientation="landscape" />
-        <activity android:name="com.renrenche.fabexpanablemenu.FabMenuActivity"></activity>
+        <activity android:name="com.renrenche.fabexpanablemenu.FabMenuActivity" />
+        <activity android:name="com.renrenche.anchorimageview.AnchorTestActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
